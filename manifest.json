@@ -1,0 +1,14 @@
+{
+  "name": "AURREXA.AI",
+  "short_name": "AURREXA",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#d4af37",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/512/d4af37/000000?text=A",
+      "sizes": "512x512"
+    }
+  ]
+}

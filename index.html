@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#d4af37">
+  <meta name="description" content="AURREXA.AI — an AI chat experience.">
+  <title>AURREXA.AI</title>
+  <link rel="manifest" href="./manifest.json">
+  <style>
+    :root { color-scheme: dark; --bg:#0a0a0a; --panel:#121212; --gold:#d4af37; --muted:#a8a8a8; --border:#292929; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; background:var(--bg); color:#f5f5f5; font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif; }
+    header { height:68px; padding:0 clamp(16px,4vw,48px); display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
+    .brand { color:var(--gold); font-size:1.12rem; font-weight:800; letter-spacing:.16em; }
+    button { font:inherit; cursor:pointer; }
+    .settings-btn,.send-btn,.save-btn { border:1px solid var(--gold); border-radius:9px; background:var(--gold); color:#090909; font-weight:700; padding:10px 16px; }
+    .settings-btn { background:transparent; color:var(--gold); }
+    main { width:min(900px,100%); margin:0 auto; padding:32px 20px 50px; }
+    .intro { text-align:center; margin:0 0 24px; }
+    h1 { margin:0 0 6px; font-size:clamp(1.6rem,4vw,2.2rem); }
+    .subtle { color:var(--muted); margin:0; }
+    #chat { height:min(48vh,500px); min-height:280px; overflow-y:auto; padding:18px; border:1px solid var(--border); border-radius:14px; background:#0e0e0e; display:flex; flex-direction:column; gap:14px; }
+    .message { max-width:min(82%,680px); padding:12px 15px; border-radius:14px; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .message.user { align-self:flex-end; background:#30280f; border:1px solid #66541d; }
+    .message.assistant { align-self:flex-start; background:#191919; border:1px solid #303030; }
+    .message.error { color:#ffb4a9; }
+    .composer { display:flex; gap:10px; margin-top:14px; }
+    #messageInput { flex:1; min-width:0; border:1px solid #333; border-radius:10px; background:#141414; color:white; padding:13px 15px; font:inherit; outline:none; }
+    #messageInput:focus,#apiKeyInput:focus { border-color:var(--gold); }
+    .send-btn:disabled { opacity:.55; cursor:wait; }
+    .pricing { margin-top:36px; }
+    .pricing h2 { text-align:center; margin:0 0 16px; font-size:1.35rem; }
+    .cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .card { padding:19px; border:1px solid var(--border); border-radius:13px; background:var(--panel); }
+    .card.featured { border-color:var(--gold); }
+    .card h3 { margin:0 0 7px; color:var(--gold); }
+    .price { font-size:1.55rem; font-weight:750; margin:5px 0; }
+    .card p { color:var(--muted); margin:0; }
+    .price-note { color:var(--muted); text-align:center; font-size:.83rem; margin:12px 0 0; }
+    dialog { width:min(460px,calc(100% - 28px)); border:1px solid #4a3d19; border-radius:15px; background:#111; color:#f5f5f5; padding:24px; box-shadow:0 24px 90px #000b; }
+    dialog::backdrop { background:#000b; }
+    dialog h2 { margin:0 0 8px; }
+    dialog p { color:var(--muted); margin:0 0 16px; }
+    #apiKeyInput { display:block; width:100%; border:1px solid #333; border-radius:9px; background:#090909; color:white; padding:12px; font:inherit; }
+    .modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:16px; }
+    .cancel-btn { border:1px solid #444; border-radius:9px; background:transparent; color:white; padding:10px 15px; }
+    @media(max-width:650px) { .cards { grid-template-columns:1fr; } main { padding-top:24px; } #chat { height:45vh; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">AURREXA.AI</div>
+    <button class="settings-btn" id="settingsButton" type="button" aria-haspopup="dialog">Settings</button>
+  </header>
+  <main>
+    <section class="intro" aria-label="Introduction">
+      <h1>How can I help?</h1>
+      <p class="subtle">Your AI conversation, powered by Groq.</p>
+    </section>
+    <section id="chat" aria-label="Chat messages" aria-live="polite"></section>
+    <form class="composer" id="chatForm">
+      <input id="messageInput" type="text" autocomplete="off" placeholder="Message AURREXA.AI…" aria-label="Your message" required>
+      <button class="send-btn" id="sendButton" type="submit">Send</button>
+    </form>
+    <section class="pricing" aria-labelledby="pricingHeading">
+      <h2 id="pricingHeading">Plans</h2>
+      <div class="cards">
+        <article class="card"><h3>Starter</h3><div class="price">Free</div><p>Bring your own Groq API key and start chatting.</p></article>
+        <article class="card featured"><h3>Plus</h3><div class="price">$9 <small>/ month</small></div><p>More room for your ideas and everyday workflows.</p></article>
+        <article class="card"><h3>Pro</h3><div class="price">$19 <small>/ month</small></div><p>Designed for power users and intensive sessions.</p></article>
+      </div>
+      <p class="price-note">Pricing cards are illustrative and do not process payments. Groq usage may be subject to Groq’s own limits and terms.</p>
+    </section>
+  </main>
+  <dialog id="settingsModal" aria-labelledby="settingsTitle">
+    <form id="settingsForm">
+      <h2 id="settingsTitle">API Key Settings</h2>
+      <p>Your key is stored in this browser’s local storage and used to call Groq directly.</p>
+      <label for="apiKeyInput">Groq API key</label>
+      <input id="apiKeyInput" type="password" placeholder="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" autocomplete="off" spellcheck="false">
+      <div class="modal-actions">
+        <button class="cancel-btn" id="cancelSettings" type="button">Cancel</button>
+        <button class="save-btn" type="submit">Save</button>
+      </div>
+    </form>
+  </dialog>
+  <script src="./app.js" defer></script>
+</body>
+</html>
