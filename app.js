@@ -13,7 +13,7 @@ function openSettings() {
 
 function addMessage(text, role, isError = false) {
   const node = document.createElement('div');
-  node.className = `message ${role}${isError ? ' error' : ''}`;
+  node.className = `message ${role}${isError? ' error' : ''}`;
   node.textContent = text;
   chat.appendChild(node);
   chat.scrollTop = chat.scrollHeight;
@@ -61,7 +61,7 @@ form.addEventListener('submit', async (event) => {
         'Authorization': `Bearer ${key}`
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'llama-3.1-8b-instant',
         messages: [{ role: 'user', content: text }]
       })
     });
@@ -71,7 +71,7 @@ form.addEventListener('submit', async (event) => {
       throw new Error(data?.error?.message || `Request failed (${response.status})`);
     }
     const reply = data?.choices?.[0]?.message?.content;
-    if (typeof reply !== 'string' || !reply.trim()) throw new Error('The API returned an empty response.');
+    if (typeof reply!== 'string' ||!reply.trim()) throw new Error('The API returned an empty response.');
     pending.textContent = reply;
   } catch (error) {
     pending.textContent = `Sorry, the request failed: ${error.message || 'Unknown error'}`;
