@@ -6,8 +6,14 @@ const sendButton = document.getElementById('sendButton');
 const modal = document.getElementById('settingsModal');
 const apiKeyInput = document.getElementById('apiKeyInput');
 
+// Cache clear on load - IMPORTANT
+if ('caches' in window) {
+  caches.keys().then(names => names.forEach(name => caches.delete(name)));
+}
+
 function openSettings() {
   if (!modal.open) modal.showModal();
+  apiKeyInput.value = localStorage.getItem(KEY_NAME) || '';
   apiKeyInput.focus();
 }
 
@@ -26,14 +32,14 @@ document.getElementById('cancelSettings').addEventListener('click', () => modal.
 document.getElementById('settingsForm').addEventListener('submit', (event) => {
   event.preventDefault();
   const value = apiKeyInput.value.trim();
-  if (!value) {
-    alert('Please enter an API Key');
-    apiKeyInput.focus();
+  if (!value.startsWith('gsk_')) {
+    alert('Key gsk_ se start honi chahiye!');
     return;
   }
   localStorage.setItem(KEY_NAME, value);
-  alert('Key Saved');
+  alert('Key Saved! Ab chat karo');
   modal.close();
+  location.reload();
 });
 
 form.addEventListener('submit', async (event) => {
@@ -62,7 +68,8 @@ form.addEventListener('submit', async (event) => {
       },
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant',
-        messages: [{ role: 'user', content: text }]
+        messages: [{ role: 'user', content: text }],
+        temperature: 0.7
       })
     });
 
@@ -71,10 +78,9 @@ form.addEventListener('submit', async (event) => {
       throw new Error(data?.error?.message || `Request failed (${response.status})`);
     }
     const reply = data?.choices?.[0]?.message?.content;
-    if (typeof reply!== 'string' ||!reply.trim()) throw new Error('The API returned an empty response.');
-    pending.textContent = reply;
+    pending.textContent = reply || 'Empty response';
   } catch (error) {
-    pending.textContent = `Sorry, the request failed: ${error.message || 'Unknown error'}`;
+    pending.textContent = `Error: ${error.message}`;
     pending.classList.add('error');
   } finally {
     sendButton.disabled = false;
@@ -83,10 +89,8 @@ form.addEventListener('submit', async (event) => {
 });
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch((error) => {
-      console.warn('Service worker registration failed:', error);
-    });
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    regs.forEach(reg => reg.unregister());
   });
 }
 
